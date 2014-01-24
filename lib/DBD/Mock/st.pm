@@ -281,6 +281,98 @@ sub fetchall_hashref {
     return $rethash;
 }
 
+sub fetchall_arrayref {
+    my ($sth, $slice, $max_rows) = @_;
+    my $dbh = $sth->{Database};
+    
+    unless ( $dbh->{mock_can_connect} ) {
+        $dbh->set_err( 1, "No connection present" );
+        return;
+    }
+    unless ( $dbh->{mock_can_fetch} ) {
+        $dbh->set_err( 1, "Cannot fetch" );
+        return;
+    }
+    
+    # when batch fetching with $max_rows were very likely to try to
+    # fetch the 'next batch' after the previous batch returned
+    # <=$max_rows. So don't treat that as an error.
+    return undef if $max_rows and not $sth->FETCH('Active');
+
+    my $mode = ref($slice) || 'ARRAY';
+    my @rows;
+
+    if ($mode eq 'ARRAY') {
+        my $row;
+        # we copy the array here because fetch (currently) always
+        # returns the same array ref. XXX
+        if ($slice && @$slice) {
+            $max_rows = -1 unless defined $max_rows;
+            push @rows, [ @{$row}[ @$slice] ]
+            while($max_rows-- and $row = $sth->fetch);
+        }
+        elsif (defined $max_rows) {
+            push @rows, [ @$row ]
+            while($max_rows-- and $row = $sth->fetch);
+        }
+        else {
+            push @rows, [ @$row ] while($row = $sth->fetch);
+        }
+        return \@rows
+    }
+
+    my %row;
+    if ($mode eq 'REF' && ref($$slice) eq 'HASH') {
+        keys %$$slice; # reset the iterator
+        while ( my ($idx, $name) = each %$$slice ) {
+            $sth->bind_col($idx+1, \$row{$name});
+        }
+    }
+    elsif ($mode eq 'HASH') {
+        if (keys %$slice) {
+            keys %$slice; # reset the iterator
+            my $name2idx = $sth->FETCH('NAME_lc_hash');
+            while ( my ($name, $unused) = each %$slice ) {
+                my $idx = $name2idx->{lc $name};
+                return $sth->set_err($DBI::stderr, "Invalid column name '$name' for slice")
+                    if not defined $idx;
+                $sth->bind_col($idx+1, \$row{$name});
+            }
+	    }
+	    else {
+            $dbh->{mock_can_fetch}++ if $dbh->{mock_can_fetch} < 0;
+            
+            my $tracker = $sth->FETCH('mock_my_history');
+            my $retarray = [];
+        
+            # get the name set by
+            my $name = $sth->{Database}->FETCH('FetchHashKeyName') || 'NAME';
+            my $fields = $sth->FETCH($name);
+            
+            while ( my $record = $tracker->next_record() ) {
+                # copy the values so as to preserve
+                # the original record...
+                my @values = @{$record};
+        
+                # populate the array
+                push (@rows, { map { $_ => shift(@values) } @{$fields} });
+            }
+	    }
+	}
+    else {
+        return $sth->set_err($DBI::stderr, "fetchall_arrayref($mode) invalid");
+    }
+
+    if (not defined $max_rows) {
+        push @rows, { %row } while ($sth->fetch); # full speed ahead!
+    }
+    else {
+        push @rows, { %row } while ($max_rows-- and $sth->fetch);
+    }
+
+    return \@rows;
+}
+
 sub finish {
     my ($sth) = @_;
     $sth->FETCH('mock_my_history')->is_finished('yes');
