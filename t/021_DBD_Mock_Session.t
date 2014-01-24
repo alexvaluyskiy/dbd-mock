@@ -1,12 +1,12 @@
 use strict;
+use warnings;
 
-use Test::More tests => 55;
+use Test::More tests => 56;
 
 BEGIN {
     use_ok('DBD::Mock');
+    use_ok('DBI');
 }
-
-use DBI;
 
 {
     package Login::Test;

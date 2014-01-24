@@ -1,9 +1,11 @@
 use strict;
+use warnings;
 
-use Test::More tests => 68;
+use Test::More tests => 69;
 
 BEGIN {
     use_ok('DBD::Mock');
+    use_ok('DBI');
 }
 
 { # check the available methods

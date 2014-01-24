@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 3;
 
 # test style cribbed from t/013_st_execute_bound_params.t
 

@@ -1,11 +1,12 @@
-use 5.006;
-
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 
-use DBI;
+BEGIN {
+    use_ok('DBD::Mock');
+    use_ok('DBI');
+}
 
 my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
     || die "Cannot create handle: $DBI::errstr\n";

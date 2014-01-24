@@ -1,8 +1,10 @@
 use strict;
+use warnings;
 
-use Test::More tests => 38;
+use Test::More tests => 39;
 
 BEGIN {
+    use_ok('DBD::Mock');
     use_ok('DBI');
 }
 

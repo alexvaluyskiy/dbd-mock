@@ -1,9 +1,11 @@
 use strict;
+use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 23;
 
 BEGIN {
     use_ok('DBD::Mock');
+    use_ok('DBI');
 }
 
 # just test the iterator plain

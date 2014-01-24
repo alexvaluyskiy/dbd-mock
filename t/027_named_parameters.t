@@ -1,10 +1,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 BEGIN {
     use_ok('DBD::Mock');
+    use_ok('DBI');
 }
 
 my $dbh = DBI->connect( 'DBI:Mock:', '', '' );
