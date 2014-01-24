@@ -5,6 +5,8 @@ perl:
   - "5.14"
   - "5.12"
   - "5.10"
+  - "5.08"
+  - "5.06"
 env:
   - "HARNESS_OPTIONS=j9 TEST_POD=1 TEST_EV=1"
 install:
