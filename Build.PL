@@ -9,7 +9,7 @@ my $build = Module::Build->new(
     module_name => 'DBD::Mock',
     license     => 'perl',
     requires    => {
-        'perl' => '5.6.0',
+        'perl' => '5.8.1',
         'DBI'  => 1.30,
     },
     optional       => {},

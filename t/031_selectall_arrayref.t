@@ -5,7 +5,7 @@ use Test::More tests => 7;
 
 BEGIN {
     use_ok('DBD::Mock');  
-	use_ok('DBI');
+    use_ok('DBI');
 }
 
 my $items_sql   = "SELECT id, name, weight FROM items";
